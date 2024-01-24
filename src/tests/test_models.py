@@ -1,7 +1,7 @@
 import pytest
 import textwrap
 from pydantic import ValidationError
-from src.models import Member
+from src.models import Member, Job
 
 
 class TestMember:
@@ -82,4 +82,85 @@ class TestMember:
     ):
         with pytest.raises(ValidationError) as validation_error:
             Member(name=name, bio=bio)
+        assert str(validation_error.value).strip() == expected_exception.strip()
+
+
+class TestJob:
+    @pytest.mark.parametrize(
+        "title,location",
+        [
+            ("Software Developer", "Edinburgh"),
+            ("", "Edinburgh"),
+            ("Software Developer", ""),
+        ],
+    )
+    def test_can_create_job_with_title_and_location(self, title, location):
+        job = Job(title=title, location=location)
+        assert job.title == title
+        assert job.location == location
+
+    @pytest.mark.parametrize(
+        "title,location,expected_exception",
+        [
+            (
+                None,
+                "Job without a title",
+                textwrap.dedent(
+                    """
+                    1 validation error for Job
+                    title
+                      Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]
+                        For further information visit https://errors.pydantic.dev/2.5/v/string_type
+                """  # noqa: E501
+                ),
+            ),
+            (
+                "Job without a location",
+                None,
+                textwrap.dedent(
+                    """
+                    1 validation error for Job
+                    location
+                      Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]
+                        For further information visit https://errors.pydantic.dev/2.5/v/string_type
+                """  # noqa: E501
+                ),
+            ),
+            (
+                None,
+                None,
+                textwrap.dedent(
+                    """
+                    2 validation errors for Job
+                    title
+                      Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]
+                        For further information visit https://errors.pydantic.dev/2.5/v/string_type
+                    location
+                      Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]
+                        For further information visit https://errors.pydantic.dev/2.5/v/string_type
+                """  # noqa: E501
+                ),
+            ),
+            (
+                3,
+                3,
+                textwrap.dedent(
+                    """
+                    2 validation errors for Job
+                    title
+                      Input should be a valid string [type=string_type, input_value=3, input_type=int]
+                        For further information visit https://errors.pydantic.dev/2.5/v/string_type
+                    location
+                      Input should be a valid string [type=string_type, input_value=3, input_type=int]
+                        For further information visit https://errors.pydantic.dev/2.5/v/string_type
+                """  # noqa: E501
+                ),
+            ),
+        ],
+    )
+    def test_can_cannot_create_member_with_non_string_args(
+        self, title, location, expected_exception
+    ):
+        with pytest.raises(ValidationError) as validation_error:
+            Job(title=title, location=location)
         assert str(validation_error.value).strip() == expected_exception.strip()
