@@ -22,7 +22,7 @@ class Member(BaseModel):
         self, jobs: List[Job], filter_on_location: bool = False
     ) -> List[Job]:
         def key(job: Job) -> int:
-            title_score = fuzz.token_sort_ratio(self.bio, job.title)
+            title_score = fuzz.token_set_ratio(job.title, self.bio)
             location_score = 10 if job.location in self.bio else 0
             return title_score + location_score
 
