@@ -4,6 +4,17 @@ from pydantic import ValidationError
 from src.models import Member, Job
 
 
+member = Member(
+    name="Fred",
+    bio="I'm looking for a job in Software Engineering in Manchester",
+)
+best_job = Job(title="Software Engineer", location="Manchester")
+second_job = Job(title="Software Developer", location="Manchester")
+third_job = Job(title="Software Engineer", location="Edinburgh")
+fourth_job = Job(title="Property Developer", location="Manchester")
+fifth_job = Job(title="King of England", location="London")
+
+
 class TestMember:
     @pytest.mark.parametrize(
         "name,bio",
@@ -85,19 +96,17 @@ class TestMember:
         assert str(validation_error.value).strip() == expected_exception.strip()
 
     def test_sort_jobs_by_relevance(self):
-        member = Member(
-            name="Fred",
-            bio="I'm looking for a job in Software Engineering in Manchester",
-        )
-        best_job = Job(title="Software Engineer", location="Manchester")
-        second_job = Job(title="Software Developer", location="Manchester")
-        third_job = Job(title="Software Engineer", location="Edinburgh")
-        fourth_job = Job(title="Property Developer", location="Manchester")
-        fifth_job = Job(title="King of England", location="London")
         ordered_jobs = member.sort_jobs_by_relevance(
             [fifth_job, fourth_job, third_job, second_job, best_job]
         )
         assert ordered_jobs == [best_job, second_job, third_job, fourth_job, fifth_job]
+
+    def test_sort_jobs_by_relevance_and_filter_on_location(self):
+        ordered_jobs = member.sort_jobs_by_relevance(
+            [fifth_job, fourth_job, third_job, second_job, best_job],
+            filter_on_location=True,
+        )
+        assert ordered_jobs == [best_job, second_job, fourth_job]
 
 
 class TestJob:
