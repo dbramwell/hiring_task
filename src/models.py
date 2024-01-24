@@ -7,10 +7,16 @@ class Job(BaseModel):
     title: str
     location: str
 
+    def __str__(self) -> str:
+        return f"{self.title} - {self.location}"
+
 
 class Member(BaseModel):
     name: str
     bio: str
+
+    def __str__(self) -> str:
+        return self.name
 
     def sort_jobs_by_relevance(self, jobs: List[Job]) -> List[Job]:
         def key(job: Job) -> int:
