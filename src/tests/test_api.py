@@ -1,5 +1,5 @@
 import pytest
-from src.api import MemberApi
+from src.api import MemberApi, JobApi
 from typing import List, TypedDict
 
 
@@ -44,3 +44,27 @@ class TestMemberApi:
         assert members[0].bio == "I am an engineer"
         assert members[1].name == "Fred"
         assert members[1].bio == "I am a designer"
+
+
+class TestJobApi:
+    @pytest.mark.asyncio
+    async def test_fetch(self, mocker):
+        api = JobApi()
+        data = [
+            {
+                "title": "Software Developer",
+                "location": "Bristol",
+            },
+            {
+                "title": "Visual Designer",
+                "location": "Glasgow",
+            },
+        ]
+        resp = MockResponse(data)
+        mocker.patch("aiohttp.ClientSession.get", return_value=resp)
+        jobs = await api.fetch()
+        assert len(jobs) == 2
+        assert jobs[0].title == "Software Developer"
+        assert jobs[0].location == "Bristol"
+        assert jobs[1].title == "Visual Designer"
+        assert jobs[1].location == "Glasgow"
